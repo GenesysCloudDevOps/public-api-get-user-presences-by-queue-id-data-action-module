@@ -1,0 +1,84 @@
+{
+  "name": "Get User Presences by Queue ID",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/analytics/queues/observations/query",
+      "requestType": "POST",
+      "headers": {},
+      "requestTemplate": "{\"filter\": \n {\"type\": \"or\", \n \"predicates\": \n [{\"type\": \"dimension\",\n\"dimension\": \"queueId\",\n\"operator\": \"matches\",\n\"value\": \"${input.QueueID}\"}]},\n\"metrics\": [\"oUserPresences\"]}"
+    },
+    "response": {
+      "translationMap": {
+        "Away": "$..data[?(@.metric == 'oUserPresences' && @.qualifier == '5e5c5c66-ea97-4e7f-ac41-6424784829f2')].stats.count",
+        "Busy": "$..data[?(@.metric == 'oUserPresences' && @.qualifier == '31fe3bac-dea6-44b7-bed7-47f91660a1a0')].stats.count",
+        "Meal": "$..data[?(@.metric == 'oUserPresences' && @.qualifier == '3fd96123-badb-4f69-bc03-1b1ccc6d8014')].stats.count",
+        "Offline": "$..data[?(@.metric == 'oUserPresences' && @.qualifier == 'ccf3c10a-aa2c-4845-8e8d-f59fa48c58e5')].stats.count",
+        "Available": "$..data[?(@.metric == 'oUserPresences' && @.qualifier == '6a3af858-942f-489d-9700-5f9bcdcdae9b')].stats.count",
+        "OnQueue": "$..data[?(@.metric == 'oUserPresences' && @.qualifier == 'e08eaf1b-ee47-4fa9-a231-1200e284798f')].stats.count"
+      },
+      "translationMapDefaults": {
+        "Away": "0",
+        "Busy": "0",
+        "Meal": "0",
+        "Offline": "0",
+        "Available": "0",
+        "OnQueue": "0"
+      },
+      "successTemplate": "{\"Away\": ${successTemplateUtils.firstFromArray(${Away}, \"0\")}, \"Available\": ${successTemplateUtils.firstFromArray(${Available}, \"0\")}, \"Meal\": ${successTemplateUtils.firstFromArray(${Meal}, \"0\")}, \"OnQueue\": ${successTemplateUtils.firstFromArray(${OnQueue}, \"0\")}, \"Busy\": ${successTemplateUtils.firstFromArray(${Busy}, \"0\")}, \"Offline\": ${successTemplateUtils.firstFromArray(${Offline}, \"0\")}}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "required": [
+          "QueueID"
+        ],
+        "properties": {
+          "QueueID": {
+            "description": "Specify the QueueID (use Get Queue ID by Name action)",
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "Away": {
+            "description": "Number of away agents",
+            "type": "integer"
+          },
+          "Available": {
+            "description": "Number of available agents",
+            "type": "integer"
+          },
+          "Meal": {
+            "description": "Number of hungry agents",
+            "type": "integer"
+          },
+          "OnQueue": {
+            "description": "Number of on-queue agents",
+            "type": "integer"
+          },
+          "Busy": {
+            "description": "Number of busy agents",
+            "type": "integer"
+          },
+          "Offline": {
+            "description": "Number of agents not logged in",
+            "type": "integer"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
